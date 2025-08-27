@@ -1,63 +1,45 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { initializeApp } = require('firebase/app');
+const { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, query, where } = require('firebase/firestore');
 
-// Crear base de datos
-const dbPath = path.join(__dirname, 'chatbot.db');
-const db = new sqlite3.Database(dbPath);
+const firebaseConfig = {
+  apiKey: "AIzaSyB2bs_z4s2ELgXNzFErHq5opnQbvN4eVNw",
+  authDomain: "xumtech-chatbot-799da.firebaseapp.com",
+  projectId: "xumtech-chatbot-799da",
+  storageBucket: "xumtech-chatbot-799da.firebasestorage.app",
+  messagingSenderId: "762621610010",
+  appId: "1:762621610010:web:80b5877a839414a3d9e9a3",
+  measurementId: "G-TMMM5R3LMC"
+};
 
-// Crear tabla de preguntas y respuestas
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS qa_pairs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      question TEXT NOT NULL,
-      keywords TEXT NOT NULL,
-      answer TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  // Crear tabla de estadísticas
-  db.run(`
-    CREATE TABLE IF NOT EXISTS chat_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_message TEXT NOT NULL,
-      bot_response TEXT NOT NULL,
-      understood BOOLEAN NOT NULL,
-      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  // Insertar datos de ejemplo
-  const insertStmt = db.prepare(`
-    INSERT OR IGNORE INTO qa_pairs (id, question, keywords, answer) 
-    VALUES (?, ?, ?, ?)
-  `);
-
+// Función para inicializar datos de ejemplo
+const initializeData = async () => {
   const sampleData = [
-  [1, '¿Qué servicios ofrece XUMTECH?', 'servicios,cx,customer experience,oracle,crm', 'XUMTECH se especializa en Customer Experience (CX), consultoría e implementación de soluciones Oracle Cloud, transformación digital, CRM, ERP, automatización de ventas y omnicanalidad en atención al cliente.'],
-  
-  [2, '¿Cómo puedo contactar a XUMTECH?', 'contacto,telefono,email,comunicar', 'Puedes contactarnos al teléfono +506 2205-5458 o visitar nuestro sitio web www.xum-tech.com. Estamos ubicados en Belén, Heredia, Costa Rica.'],
-  
-  [3, '¿Qué es XUMTECH y desde cuándo opera?', 'empresa,historia,fundacion,xumtech,suum', 'XUMTECH (anteriormente SUUM Technologies) es una empresa fundada en 2015, especializada en Customer Experience y transformación digital. Somos Partner Oracle galardonado en Centroamérica y Caribe durante dos años consecutivos.'],
-  
-  [4, '¿Qué significa ser Partner Oracle galardonado?', 'oracle,partner,premio,certificacion,galardon', 'XUMTECH ha sido galardonado como Partner del Año de Oracle en Centroamérica y Caribe durante dos años consecutivos, reconociendo nuestra experiencia y excelentes resultados en implementaciones de Oracle Cloud Applications.'],
-  
-  [5, '¿Qué metodología utilizan para las implementaciones?', 'metodologia,implementacion,cloud,aplicaciones', 'Utilizamos la metodología Cloud Application Services que asegura implementaciones exitosas, el logro de objetivos de negocio e impacto en los procesos de mercadeo, ventas, servicio, lealtad y comercio digital.'],
-  
-  [6, '¿En qué se especializa XUMTECH en transformación digital?', 'transformacion,digital,procesos,negocio', 'Nos especializamos en transformación organizacional y de procesos de negocio, habilitados por Oracle Cloud, enfocándonos en mejorar la experiencia del cliente y la permanencia de las organizaciones en el mercado.'],
-  
-  [7, '¿Qué tamaño tiene el equipo de XUMTECH?', 'equipo,empleados,tamaño,consultores', 'XUMTECH cuenta con un equipo de 51-200 empleados especializados, incluyendo consultores certificados en constante renovación de conocimientos según los estándares más recientes de Oracle.'],
-  
-  [8, '¿Trabajan con comercio electrónico?', 'ecommerce,comercio,digital,ventas,online', 'Sí, ofrecemos soluciones de eCommerce y comercio digital como parte de nuestros servicios de transformación digital, integrando experiencias omnicanales para maximizar las ventas.']
-];
+    {
+      question: '¿Qué servicios ofrece XUMTECH?',
+      keywords: 'servicios,cx,customer experience,oracle,crm',
+      answer: 'XUMTECH se especializa en Customer Experience (CX), consultoría e implementación de soluciones Oracle Cloud, transformación digital, CRM, ERP, automatización de ventas y omnicanalidad en atención al cliente.'
+    },
+    {
+      question: '¿Cómo puedo contactar a XUMTECH?',
+      keywords: 'contacto,telefono,email,comunicar',
+      answer: 'Puedes contactarnos al teléfono +506 2205-5458 o visitar nuestro sitio web www.xum-tech.com. Estamos ubicados en Belén, Heredia, Costa Rica.'
+    }
+    // Agregar más datos aquí si quieres
+  ];
 
-  sampleData.forEach(data => {
-    insertStmt.run(data);
-  });
+  try {
+    for (const data of sampleData) {
+      await addDoc(collection(db, 'qa_pairs'), data);
+    }
+    console.log('Datos inicializados en Firebase');
+  } catch (error) {
+    console.error('Error inicializando datos:', error);
+  }
+};
 
-  insertStmt.finalize();
-});
+console.log('Firebase conectado correctamente');
 
-console.log('Base de datos inicializada correctamente');
-
-module.exports = db;
+module.exports = { db, initializeData };
