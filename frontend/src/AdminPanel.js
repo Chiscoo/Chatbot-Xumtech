@@ -13,39 +13,73 @@ function AdminPanel({ darkMode, onClose }) {
   const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
-    // Datos simulados para mostrar la interfaz
-    setQuestions([
-      { id: 1, question: '¿Qué servicios ofrece XUMTECH?', keywords: 'servicios,cx,oracle', answer: 'XUMTECH se especializa en Customer Experience...' },
-      { id: 2, question: '¿Cómo contactar XUMTECH?', keywords: 'contacto,telefono', answer: 'Teléfono +506 2205-5458...' }
-    ]);
+    fetchQuestions();
   }, []);
 
   const fetchQuestions = async () => {
-    // Función deshabilitada temporalmente
-    console.log('Función de administración no disponible en producción');
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/questions');
+      const data = await response.json();
+      setQuestions(data.questions || []);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+    }
   };
 
   const fetchStats = async () => {
-    // Datos simulados de estadísticas
-    setStats({
-      totalConversations: 0,
-      understood: 0,
-      notUnderstood: 0,
-      topQuestions: [],
-      missedQuestions: []
-    });
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/stats');
+      const data = await response.json();
+      setStats(data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
   };
 
   const exportData = () => {
-    alert('Función de exportación no disponible en la versión de demostración');
+    window.open('http://localhost:5000/api/admin/export', '_blank');
   };
 
   const addQuestion = async () => {
-    alert('Panel de administración no disponible en la versión de demostración. Esta funcionalidad estaría conectada a Firebase en producción.');
+    if (!newQuestion.question || !newQuestion.keywords || !newQuestion.answer) {
+      alert('Todos los campos son obligatorios');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newQuestion)
+      });
+
+      if (response.ok) {
+        setNewQuestion({ question: '', keywords: '', answer: '' });
+        fetchQuestions();
+        alert('Pregunta agregada exitosamente!');
+      }
+    } catch (error) {
+      alert('Error al agregar pregunta');
+    }
+    setLoading(false);
   };
 
   const deleteQuestion = async (id) => {
-    alert('Panel de administración no disponible en la versión de demostración.');
+    if (!window.confirm('¿Estás seguro de eliminar esta pregunta?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/questions/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        fetchQuestions();
+        alert('Pregunta eliminada exitosamente!');
+      }
+    } catch (error) {
+      alert('Error al eliminar pregunta');
+    }
   };
 
   return (
