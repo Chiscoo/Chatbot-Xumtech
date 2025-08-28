@@ -18,7 +18,7 @@ function AdminPanel({ darkMode, onClose }) {
 
   const fetchQuestions = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/questions');
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions');
       const data = await response.json();
       setQuestions(data.questions || []);
     } catch (error) {
@@ -28,7 +28,7 @@ function AdminPanel({ darkMode, onClose }) {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/stats');
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/stats');
       const data = await response.json();
       setStats(data);
     } catch (error) {
@@ -37,7 +37,7 @@ function AdminPanel({ darkMode, onClose }) {
   };
 
   const exportData = () => {
-    window.open('http://localhost:5000/api/admin/export', '_blank');
+    window.open('https://chatbot-xumtech-production.up.railway.app/api/admin/export', '_blank');
   };
 
   const addQuestion = async () => {
@@ -48,7 +48,7 @@ function AdminPanel({ darkMode, onClose }) {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/admin/questions', {
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newQuestion)
@@ -69,7 +69,7 @@ function AdminPanel({ darkMode, onClose }) {
     if (!window.confirm('¿Estás seguro de eliminar esta pregunta?')) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/questions/${id}`, {
+      const response = await fetch(`https://chatbot-xumtech-production.up.railway.app/api/admin/questions/${id}`, {
         method: 'DELETE'
       });
 
