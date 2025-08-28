@@ -136,6 +136,37 @@ app.delete('/api/admin/questions/:id', (req, res) => {
   });
 });
 
+// Editar pregunta existente
+app.put('/api/admin/questions/:id', (req, res) => {
+  const { id } = req.params;
+  const { question, keywords, answer } = req.body;
+  
+  if (!question || !keywords || !answer) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
+  const query = `
+    UPDATE qa_pairs 
+    SET question = ?, keywords = ?, answer = ? 
+    WHERE id = ?
+  `;
+  
+  db.run(query, [question, keywords, answer, id], function(err) {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error al actualizar pregunta' });
+    }
+    
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Pregunta no encontrada' });
+    }
+    
+    res.json({ 
+      message: 'Pregunta actualizada exitosamente'
+    });
+  });
+});
+
 // Obtener estadísticas del chatbot
 app.get('/api/admin/stats', (req, res) => {
   const statsQueries = [

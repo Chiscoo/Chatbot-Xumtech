@@ -481,3 +481,87 @@
     gap: 5px;
   }
 }
+
+/* Botones de edición */
+.question-actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.edit-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.edit-btn:hover:not(:disabled) {
+  background: #138496;
+}
+
+.edit-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.edit-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Botones del formulario de edición */
+.edit-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.save-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.save-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+/* Responsive para botones de edición */
+@media (max-width: 768px) {
+  .edit-buttons {
+    flex-direction: column;
+  }
+  
+  .question-actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

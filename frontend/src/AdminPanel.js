@@ -8,6 +8,7 @@ function AdminPanel({ darkMode, onClose }) {
     keywords: '',
     answer: ''
   });
+  const [editingQuestion, setEditingQuestion] = useState(null);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [showStats, setShowStats] = useState(false);
@@ -61,6 +62,48 @@ function AdminPanel({ darkMode, onClose }) {
       }
     } catch (error) {
       alert('Error al agregar pregunta');
+    }
+    setLoading(false);
+  };
+
+  const startEdit = (question) => {
+    setEditingQuestion({
+      id: question.id,
+      question: question.question,
+      keywords: question.keywords,
+      answer: question.answer
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingQuestion(null);
+  };
+
+  const updateQuestion = async () => {
+    if (!editingQuestion.question || !editingQuestion.keywords || !editingQuestion.answer) {
+      alert('Todos los campos son obligatorios');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`https://chatbot-xumtech-production.up.railway.app/api/admin/questions/${editingQuestion.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: editingQuestion.question,
+          keywords: editingQuestion.keywords,
+          answer: editingQuestion.answer
+        })
+      });
+
+      if (response.ok) {
+        setEditingQuestion(null);
+        fetchQuestions();
+        alert('Pregunta actualizada exitosamente!');
+      }
+    } catch (error) {
+      alert('Error al actualizar pregunta');
     }
     setLoading(false);
   };
@@ -120,43 +163,92 @@ function AdminPanel({ darkMode, onClose }) {
           {!showStats ? (
             <>
               {/* Formulario para agregar pregunta */}
-              <div className="add-question-section">
-                <h3>Agregar Nueva Pregunta</h3>
-                <div className="form-group">
-                  <label>Pregunta:</label>
-                  <input
-                    type="text"
-                    value={newQuestion.question}
-                    onChange={(e) => setNewQuestion({...newQuestion, question: e.target.value})}
-                    placeholder="¿Cuál es el horario?"
-                  />
+              {!editingQuestion && (
+                <div className="add-question-section">
+                  <h3>Agregar Nueva Pregunta</h3>
+                  <div className="form-group">
+                    <label>Pregunta:</label>
+                    <input
+                      type="text"
+                      value={newQuestion.question}
+                      onChange={(e) => setNewQuestion({...newQuestion, question: e.target.value})}
+                      placeholder="¿Cuál es el horario?"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Palabras Clave (separadas por coma):</label>
+                    <input
+                      type="text"
+                      value={newQuestion.keywords}
+                      onChange={(e) => setNewQuestion({...newQuestion, keywords: e.target.value})}
+                      placeholder="horario,tiempo,horas"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Respuesta:</label>
+                    <textarea
+                      value={newQuestion.answer}
+                      onChange={(e) => setNewQuestion({...newQuestion, answer: e.target.value})}
+                      placeholder="Nuestro horario es..."
+                      rows="3"
+                    />
+                  </div>
+                  <button 
+                    className="add-btn"
+                    onClick={addQuestion}
+                    disabled={loading}
+                  >
+                    {loading ? 'Agregando...' : 'Agregar Pregunta'}
+                  </button>
                 </div>
-                <div className="form-group">
-                  <label>Palabras Clave (separadas por coma):</label>
-                  <input
-                    type="text"
-                    value={newQuestion.keywords}
-                    onChange={(e) => setNewQuestion({...newQuestion, keywords: e.target.value})}
-                    placeholder="horario,tiempo,horas"
-                  />
+              )}
+
+              {/* Formulario de edición */}
+              {editingQuestion && (
+                <div className="add-question-section">
+                  <h3>Editar Pregunta</h3>
+                  <div className="form-group">
+                    <label>Pregunta:</label>
+                    <input
+                      type="text"
+                      value={editingQuestion.question}
+                      onChange={(e) => setEditingQuestion({...editingQuestion, question: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Palabras Clave (separadas por coma):</label>
+                    <input
+                      type="text"
+                      value={editingQuestion.keywords}
+                      onChange={(e) => setEditingQuestion({...editingQuestion, keywords: e.target.value})}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Respuesta:</label>
+                    <textarea
+                      value={editingQuestion.answer}
+                      onChange={(e) => setEditingQuestion({...editingQuestion, answer: e.target.value})}
+                      rows="3"
+                    />
+                  </div>
+                  <div className="edit-buttons">
+                    <button 
+                      className="save-btn"
+                      onClick={updateQuestion}
+                      disabled={loading}
+                    >
+                      {loading ? 'Guardando...' : 'Guardar Cambios'}
+                    </button>
+                    <button 
+                      className="cancel-btn"
+                      onClick={cancelEdit}
+                      disabled={loading}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Respuesta:</label>
-                  <textarea
-                    value={newQuestion.answer}
-                    onChange={(e) => setNewQuestion({...newQuestion, answer: e.target.value})}
-                    placeholder="Nuestro horario es..."
-                    rows="3"
-                  />
-                </div>
-                <button 
-                  className="add-btn"
-                  onClick={addQuestion}
-                  disabled={loading}
-                >
-                  {loading ? 'Agregando...' : 'Agregar Pregunta'}
-                </button>
-              </div>
+              )}
 
               {/* Lista de preguntas existentes */}
               <div className="questions-list-section">
@@ -169,14 +261,25 @@ function AdminPanel({ darkMode, onClose }) {
                         <p>R: {q.answer}</p>
                         <small>Keywords: {q.keywords}</small>
                       </div>
-                      <button 
-                        className="delete-btn"
-                        onClick={() => deleteQuestion(q.id)}
-                      >
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
-                        </svg>
-                      </button>
+                      <div className="question-actions">
+                        <button 
+                          className="edit-btn"
+                          onClick={() => startEdit(q)}
+                          disabled={editingQuestion !== null}
+                        >
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"/>
+                          </svg>
+                        </button>
+                        <button 
+                          className="delete-btn"
+                          onClick={() => deleteQuestion(q.id)}
+                        >
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -233,7 +336,7 @@ function AdminPanel({ darkMode, onClose }) {
                           ))}
                         </ul>
                       ) : (
-                        <p>¡Excelente! No hay preguntas sin respuesta</p>
+                        <p>No hay preguntas sin respuesta</p>
                       )}
                     </div>
                   </div>
