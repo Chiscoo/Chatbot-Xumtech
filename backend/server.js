@@ -7,9 +7,14 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 // Middleware actualizado
 app.use(cors({
-  origin: ['https://chatbot-xumtech.vercel.app', 'http://localhost:3000'],
+  origin: [
+    'https://chatbot-xumtech.vercel.app',
+    'https://chatbot-xumtech-fqhv4mh5i-franciscos-projects-80bf3685.vercel.app',
+    'http://localhost:3000'
+  ],
   credentials: true
 }));
+
 app.use(express.json());
 
 // Ruta de prueba
