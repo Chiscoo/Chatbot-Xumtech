@@ -58,7 +58,7 @@ function Chatbot({ darkMode, isFloating = false }) {
     { label: 'Contacto', keyword: 'contacto' },
     { label: 'Oracle', keyword: 'oracle' },
     { label: 'Empresa', keyword: 'empresa' },
-    { label: 'Precios', keyword: 'precio' }
+    { label: 'Equipo', keyword: 'equipo' }
   ];
 
   return (
