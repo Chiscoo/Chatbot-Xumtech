@@ -8,11 +8,12 @@ function Chatbot({ darkMode, isFloating = false }) {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = async () => {
-    if (inputValue.trim() === '') return;
+  const sendMessage = async (messageText = null) => {
+    const textToSend = messageText || inputValue.trim();
+    if (textToSend === '') return;
 
     // Agregar mensaje del usuario
-    const userMessage = { text: inputValue, sender: 'user' };
+    const userMessage = { text: textToSend, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
     
     setIsLoading(true);
@@ -23,7 +24,7 @@ function Chatbot({ darkMode, isFloating = false }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: inputValue })
+        body: JSON.stringify({ message: textToSend })
       });
       
       const data = await response.json();
@@ -47,6 +48,19 @@ function Chatbot({ darkMode, isFloating = false }) {
     }
   };
 
+  const handleQuickAction = (keyword) => {
+    if (isLoading) return;
+    sendMessage(keyword);
+  };
+
+  const quickActions = [
+    { label: 'Servicios', keyword: 'servicios' },
+    { label: 'Contacto', keyword: 'contacto' },
+    { label: 'Oracle', keyword: 'oracle' },
+    { label: 'Empresa', keyword: 'empresa' },
+    { label: 'Precios', keyword: 'precio' }
+  ];
+
   return (
     <div className={`chatbot-container ${darkMode ? 'dark' : 'light'} ${isFloating ? 'floating' : ''}`}>
       <div className="chatbot-header">
@@ -68,6 +82,23 @@ function Chatbot({ darkMode, isFloating = false }) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Botones de acciones rápidas */}
+      <div className="quick-actions">
+        <div className="quick-actions-label">Preguntas frecuentes:</div>
+        <div className="quick-actions-buttons">
+          {quickActions.map((action, index) => (
+            <button
+              key={index}
+              className="quick-action-btn"
+              onClick={() => handleQuickAction(action.keyword)}
+              disabled={isLoading}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
       </div>
       
       <div className="chatbot-input">
