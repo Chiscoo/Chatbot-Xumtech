@@ -1,0 +1,252 @@
+/* Overlay del login */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(25, 12, 72, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+/* Container principal del login */
+.login-container {
+  width: 400px;
+  max-width: 90vw;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 15px 35px rgba(25, 12, 72, 0.3);
+}
+
+.login-container.light {
+  background: #FFFFFF;
+  color: #190C48;
+}
+
+.login-container.dark {
+  background: #170A46;
+  color: #E5E6F5;
+  border: 1px solid #190C48;
+}
+
+/* Header del login */
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h2 {
+  margin: 0 0 10px 0;
+  color: #190C48;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.login-container.dark .login-header h2 {
+  color: #E5E6F5;
+}
+
+.login-header p {
+  margin: 0;
+  color: #170A47;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.login-container.dark .login-header p {
+  color: #E4E4F3;
+}
+
+/* Formulario */
+.login-container form {
+  margin-bottom: 25px;
+}
+
+.login-container .form-group {
+  margin-bottom: 20px;
+}
+
+.login-container .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #190C48;
+  font-size: 14px;
+}
+
+.login-container.dark .form-group label {
+  color: #E5E6F5;
+}
+
+.login-container .form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #E4E4F3;
+  border-radius: 8px;
+  font-size: 16px;
+  background: #FFFFFF;
+  color: #190C48;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.login-container .form-group input:focus {
+  outline: none;
+  border-color: #190C48;
+  box-shadow: 0 0 0 3px rgba(25, 12, 72, 0.1);
+}
+
+.login-container.dark .form-group input {
+  background: #190C48;
+  border-color: #170A47;
+  color: #E5E6F5;
+}
+
+.login-container.dark .form-group input:focus {
+  border-color: #E5E6F5;
+  box-shadow: 0 0 0 3px rgba(229, 230, 245, 0.1);
+}
+
+.login-container .form-group input::placeholder {
+  color: #170A47;
+  opacity: 0.6;
+}
+
+.login-container.dark .form-group input::placeholder {
+  color: #E4E4F3;
+  opacity: 0.6;
+}
+
+/* Mensaje de error */
+.error-message {
+  background: #dc3545;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Botón de login */
+.login-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #190C48, #170A46);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(25, 12, 72, 0.3);
+}
+
+.login-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #170A46, #190C48);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(25, 12, 72, 0.4);
+}
+
+.login-btn:disabled {
+  background: #E4E4F3;
+  color: #170A47;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.login-container.dark .login-btn {
+  background: linear-gradient(135deg, #E5E6F5, #E7E8F6);
+  color: #190C48;
+  box-shadow: 0 4px 12px rgba(229, 230, 245, 0.3);
+}
+
+.login-container.dark .login-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #E7E8F6, #E9E9F7);
+  box-shadow: 0 6px 16px rgba(229, 230, 245, 0.4);
+}
+
+.login-container.dark .login-btn:disabled {
+  background: #170A47;
+  color: #E4E4F3;
+}
+
+/* Toggle entre login/registro */
+.login-toggle {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-toggle p {
+  margin: 0;
+  color: #170A47;
+  font-size: 14px;
+}
+
+.login-container.dark .login-toggle p {
+  color: #E4E4F3;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: #190C48;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.toggle-btn:hover {
+  color: #170A46;
+}
+
+.login-container.dark .toggle-btn {
+  color: #E5E6F5;
+}
+
+.login-container.dark .toggle-btn:hover {
+  color: #E7E8F6;
+}
+
+/* Credenciales demo */
+.demo-credentials {
+  text-align: center;
+  padding: 15px;
+  background: rgba(25, 12, 72, 0.1);
+  border-radius: 8px;
+  border: 1px solid #E4E4F3;
+}
+
+.login-container.dark .demo-credentials {
+  background: rgba(229, 230, 245, 0.1);
+  border-color: #170A47;
+}
+
+.demo-credentials small {
+  color: #170A47;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.login-container.dark .demo-credentials small {
+  color: #E4E4F3;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 20px;
+    margin: 20px;
+  }
+  
+  .login-header h2 {
+    font-size: 20px;
+  }
+}

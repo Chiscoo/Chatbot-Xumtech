@@ -1,11 +1,34 @@
 const express = require('express');
 const cors = require('cors');
 const db = require('./database');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Clave secreta para JWT (en producción debería estar en variables de entorno)
+const JWT_SECRET = 'xumtech-chatbot-secret-key-2024';
+
+// Middleware para verificar token JWT
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Token de acceso requerido' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Token inválido' });
+    }
+    req.user = user;
+    next();
+  });
+};
+
 // Middleware
-// Middleware actualizado
 app.use(cors({
   origin: [
     'https://chatbot-xumtech.vercel.app',
@@ -79,10 +102,117 @@ app.get('/api/questions', (req, res) => {
   });
 });
 
-// ===== RUTAS DE ADMINISTRACIÓN =====
+// ===== RUTAS DE AUTENTICACIÓN =====
+
+// Ruta de login
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
+  }
+
+  db.get('SELECT * FROM admin_users WHERE username = ?', [username], (err, user) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error del servidor' });
+    }
+
+    if (!user) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
+    bcrypt.compare(password, user.password_hash, (err, isValid) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Error del servidor' });
+      }
+
+      if (!isValid) {
+        return res.status(401).json({ error: 'Credenciales inválidas' });
+      }
+
+      const token = jwt.sign(
+        { id: user.id, username: user.username, email: user.email },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      res.json({
+        message: 'Login exitoso',
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email
+        }
+      });
+    });
+  });
+});
+
+// Ruta de registro
+app.post('/api/auth/register', (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+  }
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error del servidor' });
+    }
+
+    db.run(
+      'INSERT INTO admin_users (username, email, password_hash) VALUES (?, ?, ?)',
+      [username, email, hashedPassword],
+      function(err) {
+        if (err) {
+          if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+            return res.status(409).json({ error: 'Usuario o email ya existe' });
+          }
+          console.error(err);
+          return res.status(500).json({ error: 'Error del servidor' });
+        }
+
+        const token = jwt.sign(
+          { id: this.lastID, username, email },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+
+        res.status(201).json({
+          message: 'Usuario registrado exitosamente',
+          token,
+          user: {
+            id: this.lastID,
+            username,
+            email
+          }
+        });
+      }
+    );
+  });
+});
+
+// Ruta para verificar token
+app.get('/api/auth/verify', authenticateToken, (req, res) => {
+  res.json({
+    valid: true,
+    user: req.user
+  });
+});
+
+// ===== RUTAS DE ADMINISTRACIÓN PROTEGIDAS =====
 
 // Obtener todas las preguntas con detalles completos
-app.get('/api/admin/questions', (req, res) => {
+app.get('/api/admin/questions', authenticateToken, (req, res) => {
   db.all('SELECT * FROM qa_pairs ORDER BY id ASC', (err, rows) => {
     if (err) {
       console.error(err);
@@ -93,7 +223,7 @@ app.get('/api/admin/questions', (req, res) => {
 });
 
 // Agregar nueva pregunta
-app.post('/api/admin/questions', (req, res) => {
+app.post('/api/admin/questions', authenticateToken, (req, res) => {
   const { question, keywords, answer } = req.body;
   
   if (!question || !keywords || !answer) {
@@ -119,7 +249,7 @@ app.post('/api/admin/questions', (req, res) => {
 });
 
 // Eliminar pregunta
-app.delete('/api/admin/questions/:id', (req, res) => {
+app.delete('/api/admin/questions/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   
   db.run('DELETE FROM qa_pairs WHERE id = ?', [id], function(err) {
@@ -137,7 +267,7 @@ app.delete('/api/admin/questions/:id', (req, res) => {
 });
 
 // Editar pregunta existente
-app.put('/api/admin/questions/:id', (req, res) => {
+app.put('/api/admin/questions/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   const { question, keywords, answer } = req.body;
   
@@ -168,7 +298,7 @@ app.put('/api/admin/questions/:id', (req, res) => {
 });
 
 // Obtener estadísticas del chatbot
-app.get('/api/admin/stats', (req, res) => {
+app.get('/api/admin/stats', authenticateToken, (req, res) => {
   const statsQueries = [
     // Total de conversaciones
     'SELECT COUNT(*) as total_conversations FROM chat_logs',
@@ -214,7 +344,7 @@ app.get('/api/admin/stats', (req, res) => {
 });
 
 // Exportar conversaciones
-app.get('/api/admin/export', (req, res) => {
+app.get('/api/admin/export', authenticateToken, (req, res) => {
   db.all('SELECT user_message, bot_response, understood, datetime(timestamp, "localtime") as date FROM chat_logs ORDER BY timestamp DESC', (err, rows) => {
     if (err) {
       console.error(err);
@@ -236,4 +366,3 @@ app.get('/api/admin/export', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './AdminPanel.css';
 
-function AdminPanel({ darkMode, onClose }) {
+function AdminPanel({ darkMode, onClose, authToken }) {
   const [questions, setQuestions] = useState([]);
   const [newQuestion, setNewQuestion] = useState({
     question: '',
@@ -17,9 +17,23 @@ function AdminPanel({ darkMode, onClose }) {
     fetchQuestions();
   }, []);
 
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${authToken}`
+  });
+
   const fetchQuestions = async () => {
     try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions');
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        onClose();
+        return;
+      }
+      
       const data = await response.json();
       setQuestions(data.questions || []);
     } catch (error) {
@@ -29,7 +43,16 @@ function AdminPanel({ darkMode, onClose }) {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/stats');
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/stats', {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        onClose();
+        return;
+      }
+      
       const data = await response.json();
       setStats(data);
     } catch (error) {
@@ -38,7 +61,13 @@ function AdminPanel({ darkMode, onClose }) {
   };
 
   const exportData = () => {
-    window.open('https://chatbot-xumtech-production.up.railway.app/api/admin/export', '_blank');
+    // Crear elemento temporal para download
+    const link = document.createElement('a');
+    link.href = `https://chatbot-xumtech-production.up.railway.app/api/admin/export?token=${authToken}`;
+    link.download = 'conversaciones.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const addQuestion = async () => {
@@ -51,14 +80,23 @@ function AdminPanel({ darkMode, onClose }) {
     try {
       const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(newQuestion)
       });
+
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        onClose();
+        return;
+      }
 
       if (response.ok) {
         setNewQuestion({ question: '', keywords: '', answer: '' });
         fetchQuestions();
         alert('Pregunta agregada exitosamente!');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Error al agregar pregunta');
       }
     } catch (error) {
       alert('Error al agregar pregunta');
@@ -89,7 +127,7 @@ function AdminPanel({ darkMode, onClose }) {
     try {
       const response = await fetch(`https://chatbot-xumtech-production.up.railway.app/api/admin/questions/${editingQuestion.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           question: editingQuestion.question,
           keywords: editingQuestion.keywords,
@@ -97,10 +135,19 @@ function AdminPanel({ darkMode, onClose }) {
         })
       });
 
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        onClose();
+        return;
+      }
+
       if (response.ok) {
         setEditingQuestion(null);
         fetchQuestions();
         alert('Pregunta actualizada exitosamente!');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Error al actualizar pregunta');
       }
     } catch (error) {
       alert('Error al actualizar pregunta');
@@ -113,12 +160,22 @@ function AdminPanel({ darkMode, onClose }) {
 
     try {
       const response = await fetch(`https://chatbot-xumtech-production.up.railway.app/api/admin/questions/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAuthHeaders()
       });
+
+      if (response.status === 401 || response.status === 403) {
+        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        onClose();
+        return;
+      }
 
       if (response.ok) {
         fetchQuestions();
         alert('Pregunta eliminada exitosamente!');
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Error al eliminar pregunta');
       }
     } catch (error) {
       alert('Error al eliminar pregunta');
@@ -136,7 +193,7 @@ function AdminPanel({ darkMode, onClose }) {
               onClick={() => setShowStats(false)}
             >
               <svg viewBox="0 0 24 24" fill="currentColor" className="nav-icon">
-                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                <path d="M10 4H2v16h20V6H12l-2-2z" />
               </svg>
               Gestión
             </button>
@@ -151,7 +208,7 @@ function AdminPanel({ darkMode, onClose }) {
             </button>
             <button className="export-btn" onClick={exportData}>
               <svg viewBox="0 0 24 24" fill="currentColor" className="export-icon">
-                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                <path d="M5 20h14v-2H5v2zm7-18l-5.5 6h4v6h3v-6h4L12 2z"/>
               </svg>
               Exportar
             </button>

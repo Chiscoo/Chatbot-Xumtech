@@ -3,7 +3,7 @@ import './Chatbot.css';
 
 function Chatbot({ darkMode, isFloating = false }) {
   const [messages, setMessages] = useState([
-  { text: '¡Hola! Soy el asistente virtual de XUMTECH. ¿Tienes preguntas sobre nuestros servicios de Customer Experience o implementaciones Oracle?', sender: 'bot' }
+  { text: '¡Hola! Soy XUMTECHBot, tu asistente virtual. ¿Tenés preguntas sobre nuestros servicios de Customer Experience o implementaciones Oracle?', sender: 'bot' }
 ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
