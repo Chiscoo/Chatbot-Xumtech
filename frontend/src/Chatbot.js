@@ -9,38 +9,42 @@ function Chatbot({ darkMode, isFloating = false }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = async (messageText = null) => {
-    const textToSend = messageText || inputValue.trim();
-    if (textToSend === '') return;
+  const textToSend = messageText || inputValue.trim();
+  if (textToSend === '') return;
 
-    // Agregar mensaje del usuario
-    const userMessage = { text: textToSend, sender: 'user' };
-    setMessages(prev => [...prev, userMessage]);
+  // Agregar mensaje del usuario
+  const userMessage = { text: textToSend, sender: 'user' };
+  setMessages(prev => [...prev, userMessage]);
+  
+  setIsLoading(true);
+  
+  try {
+    const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: textToSend })
+    });
     
-    setIsLoading(true);
+    const data = await response.json();
     
-    try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: textToSend })
-      });
-      
-      const data = await response.json();
-      
-      // Agregar respuesta del bot
-      const botMessage = { text: data.response, sender: 'bot' };
-      setMessages(prev => [...prev, botMessage]);
-      
-    } catch (error) {
-      const errorMessage = { text: 'Error al conectar con el servidor', sender: 'bot' };
-      setMessages(prev => [...prev, errorMessage]);
-    }
+    // Validar que data.response sea un string válido
+    const botResponse = typeof data.response === 'string' ? data.response : 'Error en la respuesta del servidor';
     
-    setIsLoading(false);
-    setInputValue('');
-  };
+    // Agregar respuesta del bot
+    const botMessage = { text: botResponse, sender: 'bot' };
+    setMessages(prev => [...prev, botMessage]);
+    
+  } catch (error) {
+    console.error('Error:', error);
+    const errorMessage = { text: 'Error al conectar con el servidor', sender: 'bot' };
+    setMessages(prev => [...prev, errorMessage]);
+  }
+  
+  setIsLoading(false);
+  setInputValue('');
+};
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {

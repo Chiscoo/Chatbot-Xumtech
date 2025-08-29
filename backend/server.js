@@ -53,8 +53,23 @@ app.post('/api/chat', (req, res) => {
     return res.status(400).json({ error: 'Mensaje requerido' });
   }
 
-  // Extraer palabras clave del mensaje del usuario
-  const userWords = message.toLowerCase().split(' ').filter(word => word.length > 2);
+  // Extraer palabras clave del mensaje del usuario (mínimo 3 caracteres)
+  const userWords = message.toLowerCase().split(/\s+/).filter(word => word.length >= 3);
+
+  // Si no hay palabras válidas, responder que no entendió
+  if (userWords.length === 0) {
+    const response = 'Lo siento, no entendí tu pregunta. ¿Podrías reformularla?';
+    
+    db.run(
+      'INSERT INTO chat_logs (user_message, bot_response, understood) VALUES (?, ?, ?)',
+      [message, response, false],
+      (logErr) => {
+        if (logErr) console.error('Error logging conversation:', logErr);
+      }
+    );
+    
+    return res.json({ response, understood: false });
+  }
 
   // Obtener todas las preguntas y respuestas
   db.all('SELECT question, answer, keywords FROM qa_pairs', (err, rows) => {
@@ -69,7 +84,7 @@ app.post('/api/chat', (req, res) => {
     // Buscar la mejor coincidencia
     rows.forEach(row => {
       const keywords = row.keywords.toLowerCase().split(',').map(k => k.trim());
-      const questionWords = row.question.toLowerCase().split(' ');
+      const questionWords = row.question.toLowerCase().split(/\s+/).filter(word => word.length >= 3);
       const allSearchTerms = [...keywords, ...questionWords];
       
       let matches = 0;
@@ -89,7 +104,8 @@ app.post('/api/chat', (req, res) => {
 
     let response, understood;
     
-    if (bestMatch && maxMatches > 0) {
+    // Requiere al menos 2 coincidencias para considerar válida la respuesta
+    if (bestMatch && maxMatches >= 2) {
       response = bestMatch.answer;
       understood = true;
     } else {
