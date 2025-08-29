@@ -2,13 +2,18 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-// Crear base de datos
+/**
+ * Configuración y inicialización de la base de datos SQLite
+ * Maneja la creación de tablas y datos iniciales del chatbot XUMTECH
+ */
+
+// Configurar la ruta de la base de datos
 const dbPath = path.join(__dirname, 'chatbot.db');
 const db = new sqlite3.Database(dbPath);
 
-// Crear tablas y datos iniciales
+// Inicializa estructura de la base de datos
 db.serialize(() => {
-  // Crear tabla de preguntas y respuestas
+  // Tabla principal: preguntas y respuestas del chatbot
   db.run(`
     CREATE TABLE IF NOT EXISTS qa_pairs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,7 +24,7 @@ db.serialize(() => {
     )
   `);
 
-  // Crear tabla de estadísticas
+  // Tabla de logs: registro de conversaciones para estadísticas
   db.run(`
     CREATE TABLE IF NOT EXISTS chat_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +35,7 @@ db.serialize(() => {
     )
   `);
 
-  // Crear tabla de usuarios admin
+  // Tabla de usuarios: sistema de autenticación para administradores
   db.run(`
     CREATE TABLE IF NOT EXISTS admin_users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +46,7 @@ db.serialize(() => {
     )
   `);
 
-  // Crear usuario admin por defecto
+  // Administraador por defecto
   const defaultPassword = bcrypt.hashSync('admin123', 10);
   const adminStmt = db.prepare(`
     INSERT OR IGNORE INTO admin_users (id, username, email, password_hash) 
@@ -50,12 +55,13 @@ db.serialize(() => {
   adminStmt.run([1, 'admin', 'admin@xumtech.com', defaultPassword]);
   adminStmt.finalize();
 
-  // Insertar datos de ejemplo
+  // Las preguntas más frecuentes de XUMTECH
   const insertStmt = db.prepare(`
     INSERT OR IGNORE INTO qa_pairs (id, question, keywords, answer) 
     VALUES (?, ?, ?, ?)
   `);
 
+  // Base de conocimiento inicial sobre servicios XUMTECH
   const sampleData = [
     [1, '¿Qué servicios ofrece XUMTECH?', 'servicios,cx,customer experience,oracle,crm', 'XUMTECH se especializa en Customer Experience (CX), consultoría e implementación de soluciones Oracle Cloud, transformación digital, CRM, ERP, automatización de ventas y omnicanalidad en atención al cliente.'],
     
@@ -74,6 +80,7 @@ db.serialize(() => {
     [8, '¿Trabajan con comercio electrónico?', 'ecommerce,comercio,digital,ventas,online', 'Sí, ofrecemos soluciones de eCommerce y comercio digital como parte de nuestros servicios de transformación digital, integrando experiencias omnicanales para maximizar las ventas.']
   ];
 
+  // Agrega datos en la base de conocimiento
   sampleData.forEach(data => {
     insertStmt.run(data);
   });
