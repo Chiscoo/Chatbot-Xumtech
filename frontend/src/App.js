@@ -1,50 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import FloatingChat from './FloatingChat';
-import './App.css';
 import AdminPanel from './AdminPanel';
 import Login from './Login';
+import './App.css';
+
+/**
+ * Componente principal de la aplicación XUMTECH ChatBot
+ * Maneja el estado global, autenticación y navegación entre componentes
+ */
 
 function App() {
+  // Estados de la interfaz
   const [darkMode, setDarkMode] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  
+  // Estados de autenticación
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [authToken, setAuthToken] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
 
-  // Verificar autenticación al cargar la app
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const userData = localStorage.getItem('user');
+  // Restaurar sesión al inicializar la aplicación
+useEffect(() => {
+  const token = localStorage.getItem('authToken');
+  const userData = localStorage.getItem('user');
 
-    if (token && userData) {
-      // Verificar si el token sigue siendo válido
-      fetch('https://chatbot-xumtech-production.up.railway.app/api/auth/verify', {
+  // Validar token almacenado con el servidor
+  const validateStoredSession = async (token, userData) => {
+    try {
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/auth/verify', {
         headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(response => {
-        if (response.ok) {
-          setIsAuthenticated(true);
-          setUser(JSON.parse(userData));
-          setAuthToken(token);
-        } else {
-          // Token inválido, limpiar storage
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('user');
-        }
-      })
-      .catch(error => {
-        console.error('Error verificando token:', error);
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
       });
-    }
-  }, []);
 
+      if (response.ok) {
+        setIsAuthenticated(true);
+        setUser(JSON.parse(userData));
+        setAuthToken(token);
+      } else {
+        clearStoredSession();
+      }
+    } catch (error) {
+      console.error('Error validando sesión:', error);
+      clearStoredSession();
+    }
+  };
+
+  if (token && userData) {
+    validateStoredSession(token, userData);
+  }
+}, []);
+
+  // Limpiar datos de sesión almacenados
+  const clearStoredSession = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+  };
+
+  // Alternar modo oscuro/claro
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
 
+  // Manejar clic en botón de administración
   const handleAdminClick = () => {
     if (isAuthenticated) {
       setShowAdmin(true);
@@ -53,6 +70,7 @@ function App() {
     }
   };
 
+  // Procesar login exitoso
   const handleLoginSuccess = (userData, token) => {
     setIsAuthenticated(true);
     setUser(userData);
@@ -61,9 +79,9 @@ function App() {
     setShowAdmin(true);
   };
 
+  // Cerrar sesión y limpiar estado
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    clearStoredSession();
     setIsAuthenticated(false);
     setUser(null);
     setAuthToken(null);
@@ -78,6 +96,8 @@ function App() {
             <h1>XUMTECH</h1>
             <p>Experiencia Digital & Transformación</p>
           </div>
+          
+          {/* Barra de navegación con controles principales */}
           <div className="header-buttons">
             <button 
               className="modern-btn admin-btn" 
@@ -92,6 +112,7 @@ function App() {
               </span>
             </button>
 
+            {/* Mostrar botón de logout solo si está autenticado */}
             {isAuthenticated && (
               <button 
                 className="modern-btn logout-btn" 
@@ -126,11 +147,13 @@ function App() {
       </header>
       
       <main>
+        {/* Sección de presentación de la empresa */}
         <div className="main-content">
           <h2>Especialistas en Customer Experience</h2>
           <p>Partner Oracle galardonado en Centroamérica y Caribe, especializado en transformación digital y experiencia de cliente desde 2015.</p>
           <p>¿Tienes preguntas sobre nuestros servicios CX, CRM o implementaciones Oracle? Nuestro asistente está aquí para ayudarte.</p>
           
+          {/* Grid de servicios principales */}
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">
@@ -162,8 +185,10 @@ function App() {
           </div>
         </div>
         
+        {/* Chatbot flotante siempre visible */}
         <FloatingChat darkMode={darkMode} />
         
+        {/* Modales condicionales */}
         {showLogin && (
           <Login 
             onLoginSuccess={handleLoginSuccess}
