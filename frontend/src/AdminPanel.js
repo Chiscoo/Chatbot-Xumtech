@@ -60,15 +60,34 @@ function AdminPanel({ darkMode, onClose, authToken }) {
     }
   };
 
-  const exportData = () => {
-    // Crear elemento temporal para download
+  const exportData = async () => {
+  try {
+    const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/export', {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+      onClose();
+      return;
+    }
+
+    const blob = await response.blob(); // el CSV viene como blob
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = `https://chatbot-xumtech-production.up.railway.app/api/admin/export?token=${authToken}`;
+    link.href = url;
     link.download = 'conversaciones.csv';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-  };
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error exportando:", error);
+    alert("No se pudo exportar los datos");
+  }
+};
+
 
   const addQuestion = async () => {
     if (!newQuestion.question || !newQuestion.keywords || !newQuestion.answer) {
