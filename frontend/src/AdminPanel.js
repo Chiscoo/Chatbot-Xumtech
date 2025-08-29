@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './AdminPanel.css';
 
+/**
+ * Panel de administración para gestión del chatbot XUMTECH
+ * Permite CRUD completo de preguntas, visualización de estadísticas y exportación de datos
+ */
+
 function AdminPanel({ darkMode, onClose, authToken }) {
+  // Estados para la gestión de preguntas
   const [questions, setQuestions] = useState([]);
   const [newQuestion, setNewQuestion] = useState({
     question: '',
@@ -10,37 +16,47 @@ function AdminPanel({ darkMode, onClose, authToken }) {
   });
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [loading, setLoading] = useState(false);
+  
+  // Estados para estadísticas
   const [stats, setStats] = useState(null);
   const [showStats, setShowStats] = useState(false);
 
+  // Cargar preguntas al inicializar el componente
   useEffect(() => {
-    fetchQuestions();
-  }, []);
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+          headers: getAuthHeaders()
+        });
+        
+        if (response.status === 401 || response.status === 403) {
+          handleSessionExpired();
+          return;
+        }
+        
+        const data = await response.json();
+        setQuestions(data.questions || []);
+      } catch (error) {
+        console.error('Error cargando preguntas:', error);
+      }
+    };
 
+    fetchQuestions();
+  }, [authToken]); // Dependencia correcta para evitar el warning
+
+  // Generar headers de autenticación para todas las peticiones
   const getAuthHeaders = () => ({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${authToken}`
   });
 
-  const fetchQuestions = async () => {
-    try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
-        headers: getAuthHeaders()
-      });
-      
-      if (response.status === 401 || response.status === 403) {
-        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-        onClose();
-        return;
-      }
-      
-      const data = await response.json();
-      setQuestions(data.questions || []);
-    } catch (error) {
-      console.error('Error fetching questions:', error);
-    }
+  // Manejar expiración de sesión de forma consistente
+  const handleSessionExpired = () => {
+    alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+    onClose();
   };
 
+  // Cargar estadísticas de uso del chatbot
   const fetchStats = async () => {
     try {
       const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/stats', {
@@ -48,47 +64,47 @@ function AdminPanel({ darkMode, onClose, authToken }) {
       });
       
       if (response.status === 401 || response.status === 403) {
-        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-        onClose();
+        handleSessionExpired();
         return;
       }
       
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error('Error cargando estadísticas:', error);
     }
   };
 
+  // Exportar conversaciones a archivo CSV
   const exportData = async () => {
-  try {
-    const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/export', {
-      method: 'GET',
-      headers: getAuthHeaders()
-    });
+    try {
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/export', {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
 
-    if (response.status === 401 || response.status === 403) {
-      alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-      onClose();
-      return;
+      if (response.status === 401 || response.status === 403) {
+        handleSessionExpired();
+        return;
+      }
+
+      // Procesar respuesta como archivo
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'conversaciones-xumtech.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exportando datos:', error);
+      alert('No se pudo exportar los datos');
     }
+  };
 
-    const blob = await response.blob(); // el CSV viene como blob
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'conversaciones.csv';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Error exportando:", error);
-    alert("No se pudo exportar los datos");
-  }
-};
-
-
+  // Crear nueva pregunta
   const addQuestion = async () => {
     if (!newQuestion.question || !newQuestion.keywords || !newQuestion.answer) {
       alert('Todos los campos son obligatorios');
@@ -104,14 +120,18 @@ function AdminPanel({ darkMode, onClose, authToken }) {
       });
 
       if (response.status === 401 || response.status === 403) {
-        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-        onClose();
+        handleSessionExpired();
         return;
       }
 
       if (response.ok) {
         setNewQuestion({ question: '', keywords: '', answer: '' });
-        fetchQuestions();
+        // Recargar lista actualizada
+        const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+          headers: getAuthHeaders()
+        });
+        const updatedData = await updatedResponse.json();
+        setQuestions(updatedData.questions || []);
         alert('Pregunta agregada exitosamente!');
       } else {
         const error = await response.json();
@@ -123,6 +143,7 @@ function AdminPanel({ darkMode, onClose, authToken }) {
     setLoading(false);
   };
 
+  // Iniciar edición de pregunta existente
   const startEdit = (question) => {
     setEditingQuestion({
       id: question.id,
@@ -132,10 +153,12 @@ function AdminPanel({ darkMode, onClose, authToken }) {
     });
   };
 
+  // Cancelar edición en curso
   const cancelEdit = () => {
     setEditingQuestion(null);
   };
 
+  // Actualizar pregunta editada
   const updateQuestion = async () => {
     if (!editingQuestion.question || !editingQuestion.keywords || !editingQuestion.answer) {
       alert('Todos los campos son obligatorios');
@@ -155,14 +178,18 @@ function AdminPanel({ darkMode, onClose, authToken }) {
       });
 
       if (response.status === 401 || response.status === 403) {
-        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-        onClose();
+        handleSessionExpired();
         return;
       }
 
       if (response.ok) {
         setEditingQuestion(null);
-        fetchQuestions();
+        // Recargar lista actualizada
+        const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+          headers: getAuthHeaders()
+        });
+        const updatedData = await updatedResponse.json();
+        setQuestions(updatedData.questions || []);
         alert('Pregunta actualizada exitosamente!');
       } else {
         const error = await response.json();
@@ -174,6 +201,7 @@ function AdminPanel({ darkMode, onClose, authToken }) {
     setLoading(false);
   };
 
+  // Eliminar pregunta con confirmación
   const deleteQuestion = async (id) => {
     if (!window.confirm('¿Estás seguro de eliminar esta pregunta?')) return;
 
@@ -184,13 +212,17 @@ function AdminPanel({ darkMode, onClose, authToken }) {
       });
 
       if (response.status === 401 || response.status === 403) {
-        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-        onClose();
+        handleSessionExpired();
         return;
       }
 
       if (response.ok) {
-        fetchQuestions();
+        // Recargar lista actualizada
+        const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+          headers: getAuthHeaders()
+        });
+        const updatedData = await updatedResponse.json();
+        setQuestions(updatedData.questions || []);
         alert('Pregunta eliminada exitosamente!');
       } else {
         const error = await response.json();
@@ -204,6 +236,7 @@ function AdminPanel({ darkMode, onClose, authToken }) {
   return (
     <div className={`admin-overlay ${darkMode ? 'dark' : 'light'}`}>
       <div className={`admin-panel ${darkMode ? 'dark' : 'light'}`}>
+        {/* Header con navegación */}
         <div className="admin-header">
           <h2>Panel de Administración</h2>
           <div className="admin-nav">
@@ -238,7 +271,7 @@ function AdminPanel({ darkMode, onClose, authToken }) {
         <div className="admin-content">
           {!showStats ? (
             <>
-              {/* Formulario para agregar pregunta */}
+              {/* Formulario para crear nueva pregunta */}
               {!editingQuestion && (
                 <div className="add-question-section">
                   <h3>Agregar Nueva Pregunta</h3>
@@ -326,7 +359,7 @@ function AdminPanel({ darkMode, onClose, authToken }) {
                 </div>
               )}
 
-              {/* Lista de preguntas existentes */}
+              {/* Lista de preguntas con acciones CRUD */}
               <div className="questions-list-section">
                 <h3>Preguntas Existentes ({questions.length})</h3>
                 <div className="questions-list">
@@ -362,7 +395,7 @@ function AdminPanel({ darkMode, onClose, authToken }) {
               </div>
             </>
           ) : (
-            /* Sección de Estadísticas */
+            /* Dashboard de estadísticas y métricas */
             <div className="stats-section">
               {stats ? (
                 <>
