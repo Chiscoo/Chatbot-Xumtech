@@ -53,25 +53,44 @@ app.post('/api/chat', (req, res) => {
     return res.status(400).json({ error: 'Mensaje requerido' });
   }
 
-  // Buscar respuesta en la base de datos
-  const query = `
-    SELECT question, answer 
-    FROM qa_pairs 
-    WHERE keywords LIKE ? OR question LIKE ?
-  `;
-  
-  const searchTerm = `%${message.toLowerCase()}%`;
-  
-  db.get(query, [searchTerm, searchTerm], (err, row) => {
+  // Extraer palabras clave del mensaje del usuario
+  const userWords = message.toLowerCase().split(' ').filter(word => word.length > 2);
+
+  // Obtener todas las preguntas y respuestas
+  db.all('SELECT question, answer, keywords FROM qa_pairs', (err, rows) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Error del servidor' });
     }
-    
+
+    let bestMatch = null;
+    let maxMatches = 0;
+
+    // Buscar la mejor coincidencia
+    rows.forEach(row => {
+      const keywords = row.keywords.toLowerCase().split(',').map(k => k.trim());
+      const questionWords = row.question.toLowerCase().split(' ');
+      const allSearchTerms = [...keywords, ...questionWords];
+      
+      let matches = 0;
+      userWords.forEach(userWord => {
+        allSearchTerms.forEach(term => {
+          if (term.includes(userWord) || userWord.includes(term)) {
+            matches++;
+          }
+        });
+      });
+
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        bestMatch = row;
+      }
+    });
+
     let response, understood;
     
-    if (row) {
-      response = row.answer;
+    if (bestMatch && maxMatches > 0) {
+      response = bestMatch.answer;
       understood = true;
     } else {
       response = 'Lo siento, no entendí tu pregunta. ¿Podrías reformularla?';
