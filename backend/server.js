@@ -105,7 +105,7 @@ app.post('/api/chat', (req, res) => {
     let response, understood;
     
     // Requiere al menos 2 coincidencias para considerar válida la respuesta
-    if (bestMatch && maxMatches >= 2) {
+    if (bestMatch && maxMatches >= 0) {
       response = bestMatch.answer;
       understood = true;
     } else {
