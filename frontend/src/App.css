@@ -1,9 +1,13 @@
-/* Importar fuente profesional */
+/**
+ * Estilos principales de la aplicación XUMTECH ChatBot
+ * Incluye sistema de temas (claro/oscuro) y diseño responsive
+ */
+
+/* Configuración de fuente profesional */
 * {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
-/* Tipografía específica para títulos */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Inter', sans-serif;
   font-weight: 700;
@@ -19,7 +23,9 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
 }
 
-/* Tema Claro - Colores XUMTECH con fondo */
+/* ===== SISTEMA DE TEMAS ===== */
+
+/* Tema claro con fondo corporativo */
 .light-theme {
   background: 
     linear-gradient(135deg, rgba(233, 233, 247, 0.95), rgba(229, 230, 245, 0.9)),
@@ -32,7 +38,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.3s ease;
 }
 
-/* Tema Oscuro - Colores XUMTECH con fondo */
+/* Tema oscuro con colores XUMTECH */
 .dark-theme {
   background: 
     linear-gradient(135deg, rgba(23, 10, 70, 0.9), rgba(25, 12, 72, 0.95)),
@@ -45,6 +51,20 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.3s ease;
 }
 
+/* ===== LAYOUT PRINCIPAL ===== */
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  padding: 20px;
+  flex: 1;
+}
+
+/* Header con navegación */
 .App-header {
   padding: 20px;
   text-align: center;
@@ -85,13 +105,33 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.8;
 }
 
-/* Botones modernos con colores XUMTECH */
+/* Footer fijo */
+footer {
+  text-align: center;
+  padding: 20px;
+  border-top: 1px solid;
+  margin-top: auto;
+}
+
+.light-theme footer {
+  border-color: #E4E4F3;
+  background-color: #FFFFFF;
+}
+
+.dark-theme footer {
+  border-color: #170A47;
+  background-color: #190C48;
+}
+
+/* ===== NAVEGACIÓN Y BOTONES ===== */
+
 .header-buttons {
   display: flex;
   gap: 12px;
   align-items: center;
 }
 
+/* Estilos base para botones modernos */
 .modern-btn {
   display: flex;
   align-items: center;
@@ -133,7 +173,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
 }
 
-/* Botón Admin */
+/* Botón de administración */
 .admin-btn {
   background: linear-gradient(135deg, #190C48, #170A46);
   color: #E5E6F5;
@@ -153,7 +193,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(0);
 }
 
-/* Botón Theme */
+/* Botón de tema */
 .theme-btn {
   background: linear-gradient(135deg, #170A47, #190C48);
   color: #E5E6F5;
@@ -173,7 +213,27 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(0);
 }
 
-/* Modo oscuro para botones */
+/* Botón de logout */
+.logout-btn {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: #FFFFFF;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+}
+
+.logout-btn:hover .btn-icon {
+  transform: translateX(3px);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Adaptaciones para tema oscuro */
 .dark-theme .admin-btn {
   background: linear-gradient(135deg, #E5E6F5, #E4E4F3);
   color: #190C48;
@@ -194,56 +254,17 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 8px 25px rgba(231, 232, 246, 0.3);
 }
 
-/* Responsive para botones */
-@media (max-width: 768px) {
-  .header-buttons {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .modern-btn {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  
-  .btn-icon {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .btn-text {
-    display: none;
-  }
+.dark-theme .logout-btn {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: #FFFFFF;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
-/* Footer fijo al fondo */
-.App {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.dark-theme .logout-btn:hover {
+  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
 }
 
-main {
-  padding: 20px;
-  flex: 1;
-}
-
-footer {
-  text-align: center;
-  padding: 20px;
-  border-top: 1px solid;
-  margin-top: auto;
-}
-
-.light-theme footer {
-  border-color: #E4E4F3;
-  background-color: #FFFFFF;
-}
-
-.dark-theme footer {
-  border-color: #170A47;
-  background-color: #190C48;
-}
+/* ===== CONTENIDO PRINCIPAL ===== */
 
 .main-content {
   max-width: 800px;
@@ -276,7 +297,8 @@ footer {
   color: #E5E6F5;
 }
 
-/* Tarjetas de características con colores XUMTECH */
+/* ===== GRID DE SERVICIOS ===== */
+
 .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -353,8 +375,32 @@ footer {
   font-size: 0.95em;
 }
 
-/* Responsive */
+/* ===== RESPONSIVE DESIGN ===== */
+
 @media (max-width: 768px) {
+  .header-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modern-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .btn-text {
+    display: none;
+  }
+  
+  .logout-btn .btn-text {
+    display: none;
+  }
+
   .features-grid {
     grid-template-columns: 1fr;
     gap: 15px;
@@ -362,43 +408,5 @@ footer {
   
   .feature-card {
     padding: 20px 15px;
-  }
-}
-
-/* Botón Logout */
-.logout-btn {
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  color: #FFFFFF;
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-}
-
-.logout-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
-}
-
-.logout-btn:hover .btn-icon {
-  transform: translateX(3px);
-}
-
-.logout-btn:active {
-  transform: translateY(0);
-}
-
-/* Modo oscuro para botón logout */
-.dark-theme .logout-btn {
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  color: #FFFFFF;
-  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-}
-
-.dark-theme .logout-btn:hover {
-  box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
-}
-
-/* Responsive para botón logout */
-@media (max-width: 768px) {
-  .logout-btn .btn-text {
-    display: none;
   }
 }
