@@ -17,7 +17,7 @@ function Login({ onLoginSuccess, darkMode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Actualizar campos del formulario
+  // Actualizaa los campos del formulario
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -26,7 +26,7 @@ function Login({ onLoginSuccess, darkMode }) {
     setError(''); // Limpiar errores al escribir
   };
 
-  // Procesar envío del formulario
+  // Procesa envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -47,7 +47,7 @@ function Login({ onLoginSuccess, darkMode }) {
       const data = await response.json();
 
       if (response.ok) {
-        // Persistir sesión en localStorage
+        // persiste sesión en localStorage
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         onLoginSuccess(data.user, data.token);

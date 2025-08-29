@@ -21,19 +21,19 @@ function AdminPanel({ darkMode, onClose, authToken }) {
   const [stats, setStats] = useState(null);
   const [showStats, setShowStats] = useState(false);
 
-  // Generar headers de autenticación para todas las peticiones
+  // Genera headers de autenticación para todas las peticiones
 const getAuthHeaders = useCallback(() => ({
   'Content-Type': 'application/json',
   'Authorization': `Bearer ${authToken}`
 }), [authToken]);
 
-// Manejar expiración de sesión de forma consistente
+// Maneja expiración de sesión de forma consistente
 const handleSessionExpired = useCallback(() => {
   alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
   onClose();
 }, [onClose]);
 
-// Cargar preguntas al inicializar el componente
+// Carga preguntas al inicializar el componente
 useEffect(() => {
   const fetchQuestions = async () => {
     try {
@@ -56,7 +56,7 @@ useEffect(() => {
   fetchQuestions();
 }, [getAuthHeaders, handleSessionExpired]);
 
-  // Cargar estadísticas de uso del chatbot
+  // Carga estadísticas de uso del chatbot
   const fetchStats = async () => {
     try {
       const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/stats', {
@@ -75,7 +75,7 @@ useEffect(() => {
     }
   };
 
-  // Exportar conversaciones a archivo CSV
+  // Exporta conversaciones a archivo CSV
   const exportData = async () => {
     try {
       const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/export', {
@@ -88,7 +88,7 @@ useEffect(() => {
         return;
       }
 
-      // Procesar respuesta como archivo
+      // Procesa respuesta como archivo
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -104,7 +104,7 @@ useEffect(() => {
     }
   };
 
-  // Crear nueva pregunta
+  // Crea nueva pregunta
   const addQuestion = async () => {
     if (!newQuestion.question || !newQuestion.keywords || !newQuestion.answer) {
       alert('Todos los campos son obligatorios');
@@ -126,7 +126,7 @@ useEffect(() => {
 
       if (response.ok) {
         setNewQuestion({ question: '', keywords: '', answer: '' });
-        // Recargar lista actualizada
+        // Recarga lista actualizada
         const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
           headers: getAuthHeaders()
         });
@@ -143,7 +143,7 @@ useEffect(() => {
     setLoading(false);
   };
 
-  // Iniciar edición de pregunta existente
+  // Inicia edición de pregunta existente
   const startEdit = (question) => {
     setEditingQuestion({
       id: question.id,
@@ -153,12 +153,12 @@ useEffect(() => {
     });
   };
 
-  // Cancelar edición en curso
+  // Cancela edición en curso
   const cancelEdit = () => {
     setEditingQuestion(null);
   };
 
-  // Actualizar pregunta editada
+  // Actualiza pregunta editada
   const updateQuestion = async () => {
     if (!editingQuestion.question || !editingQuestion.keywords || !editingQuestion.answer) {
       alert('Todos los campos son obligatorios');
@@ -184,7 +184,7 @@ useEffect(() => {
 
       if (response.ok) {
         setEditingQuestion(null);
-        // Recargar lista actualizada
+        // Recarga lista actualizada
         const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
           headers: getAuthHeaders()
         });
@@ -201,7 +201,7 @@ useEffect(() => {
     setLoading(false);
   };
 
-  // Eliminar pregunta con confirmación
+  // Elimina pregunta con confirmación
   const deleteQuestion = async (id) => {
     if (!window.confirm('¿Estás seguro de eliminar esta pregunta?')) return;
 
@@ -217,7 +217,7 @@ useEffect(() => {
       }
 
       if (response.ok) {
-        // Recargar lista actualizada
+        // Recarga lista actualizada
         const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
           headers: getAuthHeaders()
         });

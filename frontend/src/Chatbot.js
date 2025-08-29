@@ -31,14 +31,14 @@ function Chatbot({ darkMode, isFloating = false }) {
     const textToSend = messageText || inputValue.trim();
     if (textToSend === '') return;
 
-    // Mostrar mensaje del usuario inmediatamente
+    // Muestra mensaje del usuario inmediatamente
     const userMessage = { text: textToSend, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
     
     setIsLoading(true);
     
     try {
-      // Enviar mensaje al servidor para procesamiento
+      // Envia mensaje al servidor para procesamiento
       const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,12 +47,12 @@ function Chatbot({ darkMode, isFloating = false }) {
       
       const data = await response.json();
       
-      // Validar respuesta del servidor
+      // Valida respuesta del servidor
       const botResponse = typeof data.response === 'string' 
         ? data.response 
         : 'Error en la respuesta del servidor';
       
-      // Mostrar respuesta del bot
+      // Muestra respuesta del bot
       const botMessage = { text: botResponse, sender: 'bot' };
       setMessages(prev => [...prev, botMessage]);
       

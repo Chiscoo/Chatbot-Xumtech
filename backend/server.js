@@ -56,24 +56,24 @@ app.post('/api/chat', (req, res) => {
     return res.status(400).json({ error: 'Mensaje requerido' });
   }
 
-  // Filtrar palabras significativas del mensaje del usuario
+  // Filtra palabras significativas del mensaje del usuario
   const userWords = message.toLowerCase().split(/\s+/).filter(word => word.length >= 3);
 
-  // Validar que hay contenido procesable
+  // Valida que hay contenido procesable
   if (userWords.length === 0) {
     const response = 'Lo siento, no entendí tu pregunta. ¿Podrías reformularla?';
     logConversation(message, response, false);
     return res.json({ response, understood: false });
   }
 
-  // Buscar coincidencias en la base de conocimiento
+  // Busca coincidencias en la base de datos
   db.all('SELECT question, answer, keywords FROM qa_pairs', (err, rows) => {
     if (err) {
       console.error('Error base de datos:', err);
       return res.status(500).json({ error: 'Error del servidor' });
     }
 
-    // Algoritmo de matching inteligente
+    // Algoritmo de matching 
     let bestMatch = null;
     let maxMatches = 0;
 
@@ -97,7 +97,7 @@ app.post('/api/chat', (req, res) => {
       }
     });
 
-    // Evaluar confianza de la respuesta
+    // Evalua confianza de la respuesta
     let response, understood;
     if (bestMatch && maxMatches >= 1) {
       response = bestMatch.answer;
@@ -154,13 +154,13 @@ app.post('/api/auth/login', (req, res) => {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    // Verificar contraseña hasheada
+    // Verifica contraseña hasheada
     bcrypt.compare(password, user.password_hash, (err, isValid) => {
       if (err || !isValid) {
         return res.status(401).json({ error: 'Credenciales inválidas' });
       }
 
-      // Generar token de sesión
+      // Genera token de sesión
       const token = jwt.sign(
         { id: user.id, username: user.username, email: user.email },
         JWT_SECRET,
@@ -231,7 +231,7 @@ app.get('/api/auth/verify', authenticateToken, (req, res) => {
 
 // ===== PANEL DE ADMINISTRACIÓN - RUTAS PROTEGIDAS =====
 
-// Listar todas las preguntas para administración
+// Lista todas las preguntas para administración
 app.get('/api/admin/questions', authenticateToken, (req, res) => {
   db.all('SELECT * FROM qa_pairs ORDER BY id ASC', (err, rows) => {
     if (err) {
@@ -242,7 +242,7 @@ app.get('/api/admin/questions', authenticateToken, (req, res) => {
   });
 });
 
-// Crear nueva pregunta
+// Crea nueva pregunta
 app.post('/api/admin/questions', authenticateToken, (req, res) => {
   const { question, keywords, answer } = req.body;
   
@@ -267,7 +267,7 @@ app.post('/api/admin/questions', authenticateToken, (req, res) => {
   );
 });
 
-// Actualizar pregunta existente
+// Actualiza pregunta existente
 app.put('/api/admin/questions/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   const { question, keywords, answer } = req.body;
@@ -294,7 +294,7 @@ app.put('/api/admin/questions/:id', authenticateToken, (req, res) => {
   );
 });
 
-// Eliminar pregunta
+// Elimina pregunta
 app.delete('/api/admin/questions/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   
@@ -317,7 +317,7 @@ app.get('/api/admin/stats', authenticateToken, (req, res) => {
   const stats = {};
   let completed = 0;
 
-  // Recopilar métricas de uso
+  // Recopila métricas de uso
   const queries = [
     'SELECT COUNT(*) as total_conversations FROM chat_logs',
     'SELECT understood, COUNT(*) as count FROM chat_logs GROUP BY understood',
@@ -355,7 +355,7 @@ app.get('/api/admin/stats', authenticateToken, (req, res) => {
   });
 });
 
-// Exportar logs de conversación a CSV
+// Exporta logs de conversación a CSV
 app.get('/api/admin/export', authenticateToken, (req, res) => {
   db.all(
     'SELECT user_message, bot_response, understood, datetime(timestamp, "localtime") as date FROM chat_logs ORDER BY timestamp DESC',
@@ -378,7 +378,7 @@ app.get('/api/admin/export', authenticateToken, (req, res) => {
   );
 });
 
-// Iniciar servidor
+// Inicia servidor
 app.listen(PORT, () => {
   console.log(`Servidor XUMTECH ChatBot corriendo en puerto ${PORT}`);
 });

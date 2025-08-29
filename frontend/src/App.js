@@ -20,12 +20,12 @@ function App() {
   const [user, setUser] = useState(null);
   const [authToken, setAuthToken] = useState(null);
 
-  // Restaurar sesión al inicializar la aplicación
+  // Restaura sesión al inicializar la aplicación
 useEffect(() => {
   const token = localStorage.getItem('authToken');
   const userData = localStorage.getItem('user');
 
-  // Validar token almacenado con el servidor
+  // Valida token almacenado con el servidor
   const validateStoredSession = async (token, userData) => {
     try {
       const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/auth/verify', {
@@ -50,18 +50,18 @@ useEffect(() => {
   }
 }, []);
 
-  // Limpiar datos de sesión almacenados
+  // Limpia datos de sesión almacenados
   const clearStoredSession = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
   };
 
-  // Alternar modo oscuro/claro
+  // Alterna modo oscuro/claro
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
 
-  // Manejar clic en botón de administración
+  // Maneja clic en botón de administración
   const handleAdminClick = () => {
     if (isAuthenticated) {
       setShowAdmin(true);
@@ -70,7 +70,7 @@ useEffect(() => {
     }
   };
 
-  // Procesar login exitoso
+  // Procesa login exitoso
   const handleLoginSuccess = (userData, token) => {
     setIsAuthenticated(true);
     setUser(userData);
@@ -79,7 +79,7 @@ useEffect(() => {
     setShowAdmin(true);
   };
 
-  // Cerrar sesión y limpiar estado
+  // Cierra sesión y limpia estado
   const handleLogout = () => {
     clearStoredSession();
     setIsAuthenticated(false);
