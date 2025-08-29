@@ -117,12 +117,6 @@ function Login({ onLoginSuccess, darkMode }) {
             </button>
           </p>
         </div>
-
-        {isLogin && (
-          <div className="demo-credentials">
-            <small>Credenciales demo: admin / admin123</small>
-          </div>
-        )}
       </div>
     </div>
   );
