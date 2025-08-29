@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './AdminPanel.css';
 
 /**
@@ -21,40 +21,40 @@ function AdminPanel({ darkMode, onClose, authToken }) {
   const [stats, setStats] = useState(null);
   const [showStats, setShowStats] = useState(false);
 
-  // Cargar preguntas al inicializar el componente
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
-          headers: getAuthHeaders()
-        });
-        
-        if (response.status === 401 || response.status === 403) {
-          handleSessionExpired();
-          return;
-        }
-        
-        const data = await response.json();
-        setQuestions(data.questions || []);
-      } catch (error) {
-        console.error('Error cargando preguntas:', error);
-      }
-    };
-
-    fetchQuestions();
-  }, [authToken]); // Dependencia correcta para evitar el warning
-
   // Generar headers de autenticación para todas las peticiones
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${authToken}`
-  });
+const getAuthHeaders = useCallback(() => ({
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${authToken}`
+}), [authToken]);
 
-  // Manejar expiración de sesión de forma consistente
-  const handleSessionExpired = () => {
-    alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
-    onClose();
+// Manejar expiración de sesión de forma consistente
+const handleSessionExpired = useCallback(() => {
+  alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+  onClose();
+}, [onClose]);
+
+// Cargar preguntas al inicializar el componente
+useEffect(() => {
+  const fetchQuestions = async () => {
+    try {
+      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+        headers: getAuthHeaders()
+      });
+      
+      if (response.status === 401 || response.status === 403) {
+        handleSessionExpired();
+        return;
+      }
+      
+      const data = await response.json();
+      setQuestions(data.questions || []);
+    } catch (error) {
+      console.error('Error cargando preguntas:', error);
+    }
   };
+
+  fetchQuestions();
+}, [getAuthHeaders, handleSessionExpired]);
 
   // Cargar estadísticas de uso del chatbot
   const fetchStats = async () => {
