@@ -99,7 +99,7 @@ app.post('/api/chat', (req, res) => {
 
     // Evaluar confianza de la respuesta
     let response, understood;
-    if (bestMatch && maxMatches >= 2) {
+    if (bestMatch && maxMatches >= 1) {
       response = bestMatch.answer;
       understood = true;
     } else {
