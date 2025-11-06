@@ -2,12 +2,12 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-/**
+/*
  * Configuración y inicialización de la base de datos SQLite
  * Maneja la creación de tablas y datos iniciales del chatbot XUMTECH
  */
 
-// Configurar la ruta de la base de datos
+// Configura la ruta de la base de datos
 const dbPath = path.join(__dirname, 'chatbot.db');
 const db = new sqlite3.Database(dbPath);
 
@@ -61,7 +61,7 @@ db.serialize(() => {
     VALUES (?, ?, ?, ?)
   `);
 
-  // Base de conocimiento inicial sobre servicios XUMTECH
+  // Base de datos inicial sobre servicios XUMTECH
   const sampleData = [
     [1, '¿Qué servicios ofrece XUMTECH?', 'servicios,cx,customer experience,oracle,crm', 'XUMTECH se especializa en Customer Experience (CX), consultoría e implementación de soluciones Oracle Cloud, transformación digital, CRM, ERP, automatización de ventas y omnicanalidad en atención al cliente.'],
     
@@ -80,7 +80,7 @@ db.serialize(() => {
     [8, '¿Trabajan con comercio electrónico?', 'ecommerce,comercio,digital,ventas,online', 'Sí, ofrecemos soluciones de eCommerce y comercio digital como parte de nuestros servicios de transformación digital, integrando experiencias omnicanales para maximizar las ventas.']
   ];
 
-  // Agrega datos en la base de conocimiento
+  // Agrega datos en la base de datos
   sampleData.forEach(data => {
     insertStmt.run(data);
   });

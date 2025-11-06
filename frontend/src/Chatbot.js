@@ -39,7 +39,7 @@ function Chatbot({ darkMode, isFloating = false }) {
     
     try {
       // Envia mensaje al servidor para procesamiento
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/chat', {
+      const response = await fetch('https://chatbot-xumtech-backend.onrender.com/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: textToSend })
@@ -69,14 +69,14 @@ function Chatbot({ darkMode, isFloating = false }) {
     setInputValue('');
   };
 
-  // Manejar envío con tecla Enter
+  // Maneja envío con tecla Enter
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       sendMessage();
     }
   };
 
-  // Procesar clics en botones de acceso rápido
+  // Procesa clics en botones de acceso rápido
   const handleQuickAction = (keyword) => {
     if (isLoading) return;
     sendMessage(keyword);

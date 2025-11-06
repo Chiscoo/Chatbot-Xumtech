@@ -33,12 +33,13 @@ function Login({ onLoginSuccess, darkMode }) {
     setError('');
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+    //condicional
     const payload = isLogin 
       ? { username: formData.username, password: formData.password }
       : formData;
 
     try {
-      const response = await fetch(`https://chatbot-xumtech-production.up.railway.app${endpoint}`, {
+      const response = await fetch(`https://chatbot-xumtech-backend.onrender.com${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

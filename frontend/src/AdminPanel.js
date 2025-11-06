@@ -37,7 +37,7 @@ const handleSessionExpired = useCallback(() => {
 useEffect(() => {
   const fetchQuestions = async () => {
     try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+      const response = await fetch('https://chatbot-xumtech-backend.onrender.com/api/admin/questions', {
         headers: getAuthHeaders()
       });
       
@@ -59,7 +59,7 @@ useEffect(() => {
   // Carga estadísticas de uso del chatbot
   const fetchStats = async () => {
     try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/stats', {
+      const response = await fetch('https://chatbot-xumtech-backend.onrender.com/api/admin/stats', {
         headers: getAuthHeaders()
       });
       
@@ -78,7 +78,7 @@ useEffect(() => {
   // Exporta conversaciones a archivo CSV
   const exportData = async () => {
     try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/export', {
+      const response = await fetch('https://chatbot-xumtech-backend.onrender.com/api/admin/export', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -113,7 +113,7 @@ useEffect(() => {
 
     setLoading(true);
     try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+      const response = await fetch('https://chatbot-xumtech-backend.onrender.com/api/admin/questions', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(newQuestion)
@@ -127,7 +127,7 @@ useEffect(() => {
       if (response.ok) {
         setNewQuestion({ question: '', keywords: '', answer: '' });
         // Recarga lista actualizada
-        const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+        const updatedResponse = await fetch('https://chatbot-xumtech-backend.onrender.com/api/admin/questions', {
           headers: getAuthHeaders()
         });
         const updatedData = await updatedResponse.json();
@@ -167,7 +167,7 @@ useEffect(() => {
 
     setLoading(true);
     try {
-      const response = await fetch(`https://chatbot-xumtech-production.up.railway.app/api/admin/questions/${editingQuestion.id}`, {
+      const response = await fetch(`'https://chatbot-xumtech-backend.onrender.com/api/admin/questions/${editingQuestion.id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -185,7 +185,7 @@ useEffect(() => {
       if (response.ok) {
         setEditingQuestion(null);
         // Recarga lista actualizada
-        const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+        const updatedResponse = await fetch('https://chatbot-xumtech-backend.onrender.com/api/admin/questions', {
           headers: getAuthHeaders()
         });
         const updatedData = await updatedResponse.json();
@@ -206,7 +206,7 @@ useEffect(() => {
     if (!window.confirm('¿Estás seguro de eliminar esta pregunta?')) return;
 
     try {
-      const response = await fetch(`https://chatbot-xumtech-production.up.railway.app/api/admin/questions/${id}`, {
+      const response = await fetch(`'https://chatbot-xumtech-backend.onrender.com/api/admin/questions/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -218,7 +218,7 @@ useEffect(() => {
 
       if (response.ok) {
         // Recarga lista actualizada
-        const updatedResponse = await fetch('https://chatbot-xumtech-production.up.railway.app/api/admin/questions', {
+        const updatedResponse = await fetch('https://chatbot-xumtech-backend.onrender.com/api/admin/questions', {
           headers: getAuthHeaders()
         });
         const updatedData = await updatedResponse.json();

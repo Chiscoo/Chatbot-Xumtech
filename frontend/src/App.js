@@ -28,7 +28,7 @@ useEffect(() => {
   // Valida token almacenado con el servidor
   const validateStoredSession = async (token, userData) => {
     try {
-      const response = await fetch('https://chatbot-xumtech-production.up.railway.app/api/auth/verify', {
+      const response = await fetch('https://chatbot-xumtech-backend.onrender.com/api/auth/verify', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
